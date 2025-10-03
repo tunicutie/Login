@@ -26,10 +26,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
     }
+    // Salt, pepper, password_hash, hash_hmac
+    $salt = bin2hex(random_bytes(8));
+    $pepper = 'P3pp3rS3gr3t0!';
+    $pwd_peppered = hash_hmac('sha256', $password, $pepper);
+    $password_hash = password_hash($salt . $pwd_peppered, PASSWORD_DEFAULT);
+    $type_hash = hash_hmac('sha256', $salt . $type, $pepper);
+
     $users[] = [
         'username' => $username,
-        'password' => $password,
-        'type' => $type
+        'password' => $password_hash,
+        'type' => $type_hash,
+        'salt' => $salt
     ];
     file_put_contents('../users.json', json_encode($users, JSON_PRETTY_PRINT));
     $_SESSION['username'] = $username;
